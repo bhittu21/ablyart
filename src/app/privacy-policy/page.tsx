@@ -27,7 +27,7 @@ export default function PrivacyPolicyPage() {
         },
         {
           heading: "Contact",
-          body: "For privacy questions or requests, email hello@ablyart.com or call +880 1790-508929.",
+          body: "For privacy questions or requests, email hello@ablyart.com or call +880 1969-481123.",
         },
       ]}
     />

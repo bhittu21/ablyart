@@ -97,7 +97,7 @@ export default function StartFreeModal() {
                         type="tel" 
                         name="whatsapp"
                         required 
-                        placeholder="+880 1790-508929"
+                        placeholder="+880 1969-481123"
                         className="w-full bg-[#13131a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] transition-all"
                       />
                     </div>

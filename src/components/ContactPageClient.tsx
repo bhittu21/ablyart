@@ -44,8 +44,8 @@ const contactMethods = [
       </svg>
     ),
     label: "Call Us",
-    value: "+880 1790-508929",
-    href: "tel:+8801790508929",
+    value: "+880 1969-481123",
+    href: "tel:+8801969481123",
     accent: "#6ee7ff",
     rgb: "110,231,255",
   },
