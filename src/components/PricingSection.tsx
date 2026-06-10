@@ -354,7 +354,7 @@ export default function PricingTable({
     selectedTerm(pkg) === "oneMonth" ? pkg.oneMonthNote : pkg.fourMonthNote;
 
   return (
-    <div id={id || "pricing-table"} className="w-full relative flex flex-col items-center justify-center z-20 overflow-visible mb-24">
+    <div id={id || "pricing"} className="w-full relative flex flex-col items-center justify-center z-20 overflow-visible mb-24">
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-[var(--accent)] opacity-[0.04] blur-[150px] rounded-full pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-6 relative w-full">

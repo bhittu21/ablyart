@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { FaSearch, FaUsers, FaProjectDiagram, FaHandshake, FaMousePointer, FaEnvelopeOpenText, FaHeart, FaChartLine, FaSearchLocation, FaSyncAlt } from "react-icons/fa";
 import { Button } from "@/components/ui/Button";
 import PricingTable from "@/components/PricingSection";
+import { OFFICIAL_LINKS } from "@/constants/links";
 
 type ServiceDetail = {
   name: string;
@@ -226,7 +227,9 @@ export default function ValueFocusSection({
                className="mt-16 text-center relative z-10 flex flex-col items-center"
             >
               <Button
-                href="#discovery"
+                href={OFFICIAL_LINKS.calendly}
+                target="_blank"
+                rel="noopener noreferrer"
                 variant="primary"
                 size="lg"
                 className="uppercase tracking-[0.05em] font-bold"
