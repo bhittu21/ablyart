@@ -1,831 +1,559 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { OFFICIAL_LINKS } from "@/constants/links";
 
-export type DetailedDeliverable = {
-  title: string;
-  quality: string;
-  time: string;
-  quantity: string;
-};
+type BillingTerm = "oneMonth" | "fourMonth";
 
 export type PricingPackage = {
   name: string;
-  price: string | number;
-  originalPrice?: string;
-  discountPercentage?: number;
-  monthlyDiscountPercentage?: number;
-  period: string;
   description: string;
-  features: Array<string | { text: React.ReactNode; included: boolean }>;
-  detailedDeliverables?: DetailedDeliverable[];
-  isPopular: boolean;
+  oneMonth: string;
+  oneMonthNote?: string;
+  fourMonth: string;
+  fourMonthNote?: string;
+  bestFor?: string;
+  features: string[];
+  recommendedBudget?: string;
+  bestOutcome?: string;
+  badge?: "Most Selected" | "Best Value";
 };
 
-function getFeatureDisplay(feature: PricingPackage["features"][number]) {
-  if (typeof feature === "object" && feature !== null && "included" in feature) {
-    return {
-      isIncluded: feature.included,
-      content: feature.text,
-    };
-  }
+type PricingCategory = {
+  label: string;
+  heading?: string;
+  subheading?: string;
+  description?: ReactNode;
+  supportingDescription?: string;
+  note?: string;
+  packages: PricingPackage[];
+};
 
-  return {
-    isIncluded: true,
-    content: feature,
-  };
-}
+type PricingCategoryKey = "growth-marketing" | "performance-marketing" | "social-media" | "seo";
 
-const pricingData: Record<string, { label: string; packages: PricingPackage[] }> = {
+export const pricingData: Record<PricingCategoryKey, PricingCategory> = {
   "growth-marketing": {
     label: "Growth Marketing",
+    heading: "Strategic Growth",
+    subheading: "Investments",
+    description:
+      "Choose a focused growth system for visibility, content, outreach, conversion, and campaign improvement.",
+    note: "Paid ads management included where listed. Ad spend is paid separately by the client. No hidden media spend inside our pricing.",
     packages: [
-  {
-    name: "Starter",
-    price: 1500,
-    discountPercentage: 40,
-    monthlyDiscountPercentage: 0,
-    period: "/mo",
-    description: "For startups planting their first flag.",
-    features: [
-      { text: <><span className="text-[#eab308] font-bold">500</span> cold outreach emails/mo (Apollo)</>, included: true },
-      { text: <><span className="text-[#eab308] font-bold">2</span> social platform — <span className="text-[#eab308] font-bold">12</span> posts/mo</>, included: true },
-      { text: <><span className="text-[#eab308] font-bold">1</span> SEO topic clusters + <span className="text-[#eab308] font-bold">2</span> blogs/mo</>, included: true },
-      { text: "Technical SEO fixes", included: true },
-      { text: "Landing page build", included: false },
-      { text: <>Paid ads up to <span className="text-[#eab308] font-bold">$2,000</span> spend — Meta, TikTok & Google</>, included: true },
-      { text: "Custom product development support", included: false },
-      { text: "Monthly performance report", included: true },
+      {
+        name: "Starter",
+        description: "For brands that need the right growth foundation.",
+        oneMonth: "$499/mo",
+        oneMonthNote: "Best for a fast audit, setup, and first campaign launch.",
+        fourMonth: "$399/mo",
+        fourMonthNote: "Best for building basic visibility and early lead flow.",
+        features: [
+          "1 social platform",
+          "8 posts/month",
+          "1 SEO blog/month",
+          "Basic SEO fixes",
+          "500 outreach emails/month on 4-month plan",
+          "Landing page review",
+          "Paid ads setup guidance",
+          "Monthly report",
+        ],
+      },
+      {
+        name: "Growth Engine",
+        description: "For brands ready to build a consistent pipeline.",
+        oneMonth: "$999/mo",
+        oneMonthNote: "Best for launching a focused growth system.",
+        fourMonth: "$749/mo",
+        fourMonthNote: "Best for improving content, outreach, ads, and conversion over time.",
+        features: [
+          "2 social platforms",
+          "12 posts/month",
+          "2 SEO blogs/month",
+          "1 topic cluster/month",
+          "On-page and technical SEO",
+          "1,500 outreach emails/month on 4-month plan",
+          "1 landing page or funnel improvement/month",
+          "Paid ads management for 1 platform",
+          "Monthly strategy call",
+        ],
+        badge: "Most Selected",
+      },
+      {
+        name: "Market Domination",
+        description: "For brands ready to scale across multiple channels.",
+        oneMonth: "$1,799/mo",
+        oneMonthNote: "Best for serious growth setup and multi-channel launch.",
+        fourMonth: "$1,299/mo",
+        fourMonthNote: "Best for scaling the channels that prove traction.",
+        features: [
+          "3 social platforms",
+          "20 posts/month",
+          "4 SEO blogs/month",
+          "2 topic clusters/month",
+          "Technical SEO and Core Web Vitals support",
+          "3,500 outreach emails/month on 4-month plan",
+          "1 landing page build or major optimization/month",
+          "Paid ads management for up to 2 platforms",
+          "Weekly update",
+          "Monthly dashboard",
+        ],
+      },
     ],
-    detailedDeliverables: [],
-    isPopular: false,
-  },
-  {
-    name: "Growth Engine",
-    price: 3000,
-    discountPercentage: 50,
-    monthlyDiscountPercentage: 20,
-    period: "/mo",
-    description: "For startups ready to build real pipeline.",
-    features: [
-      { text: <><span className="text-white font-bold">2,000</span> cold outreach emails/mo (Apollo)</>, included: true },
-      { text: <><span className="text-white font-bold">3</span> social platforms — <span className="text-white font-bold">20</span> posts/mo each</>, included: true },
-      { text: <><span className="text-white font-bold">4</span> SEO topic clusters + <span className="text-white font-bold">4</span> blogs/mo</>, included: true },
-      { text: "On-page & technical SEO fixes", included: true },
-      { text: "1 landing page build or optimization + 1 funnel optimization", included: true },
-      { text: <>Paid ads up to <span className="text-white font-bold">$10,000</span> spend — Meta, TikTok & Google</>, included: true },
-      { text: <><span className="text-white font-bold">2</span> custom landing pages or web components/mo</>, included: true },
-      { text: "Monthly audit & attribution report", included: true },
-    ],
-    detailedDeliverables: [],
-    isPopular: true,
-  },
-  {
-    name: "Market Domination",
-    price: 5000,
-    discountPercentage: 60,
-    monthlyDiscountPercentage: 30,
-    period: "/mo",
-    description: "For startups ready to dominate their market.",
-    features: [
-      { text: <><span className="text-white font-bold">5,000</span> cold outreach emails/mo (Apollo)</>, included: true },
-      { text: <><span className="text-white font-bold">4</span> social platforms — <span className="text-white font-bold">30</span> posts/mo each</>, included: true },
-      { text: <><span className="text-white font-bold">8</span> SEO topic clusters + <span className="text-white font-bold">8</span> blogs/mo + link building</>, included: true },
-      { text: "Full technical SEO + Core Web Vitals", included: true },
-      { text: "Custom landing page + funnel build", included: true },
-      { text: <>Paid ads up to <span className="text-white font-bold">$20,000</span> spend — Meta, TikTok & Google</>, included: true },
-      { text: <><span className="text-white font-bold">Dedicated</span> web developer support</>, included: true },
-      { text: "Weekly performance dashboard", included: true },
-    ],
-    detailedDeliverables: [],
-    isPopular: false,
-  },
-]
   },
   "performance-marketing": {
     label: "Performance Marketing",
+    heading: "Performance",
+    subheading: "Marketing",
+    description: "Turn ad spend into tracked leads, sales, and revenue.",
+    supportingDescription:
+      "Run paid campaigns with clear targeting, better tracking, sharper creatives, and monthly performance improvement.",
+    note: "Ad spend is paid separately by the client. No hidden media spend inside our pricing.",
     packages: [
       {
         name: "Scale Starter",
-        price: "$2,800",
-        originalPrice: "$3,500",
-        discountPercentage: 20,
-        period: "/mo + 10% Ad Spend",
-        description: "Perfect for validating a new product and establishing profitable unit economics.",
+        description: "For validating one paid channel and finding what converts.",
+        oneMonth: "$699/mo",
+        fourMonth: "$549/mo",
+        bestFor: "New campaigns, small ad budgets, and businesses testing paid acquisition.",
         features: [
-          "1 Platform (e.g., Google or Meta)",
-          "4 Static + 2 Web Banners/mo",
-          "Standard Tracking Setup",
-          "Weekly Bid Adjustments",
-          "Monthly ROI Report"
+          "1 ad platform - Google or Meta",
+          "Campaign setup or account cleanup",
+          "Basic conversion tracking setup",
+          "4 static ad creatives/month",
+          "2 ad copy variations/month",
+          "Landing page review",
+          "Weekly campaign checks",
+          "Monthly performance report",
         ],
-        detailedDeliverables: [
-          {
-            title: "Channel Deployment",
-            quantity: "1 Primary Platform",
-            quality: "Deep intent targeting on Google or Meta",
-            time: "Always-on deployment"
-          },
-          {
-            title: "Creative Laboratory",
-            quantity: "4 Static + 2 Web Banners",
-            quality: "Direct-response ad copy and scroll-stopping visuals",
-            time: "New creatives introduced monthly"
-          },
-          {
-            title: "Technical Foundation",
-            quantity: "Tracking & Conversion Pixels",
-            quality: "Standard tracking implementation for accurate attribution",
-            time: "Built during onboarding"
-          },
-          {
-            title: "Campaign Management",
-            quantity: "Weekly Optimization Cycle",
-            quality: "Bid-cap adjustments, audience pruning, and scaling",
-            time: "Weekly tuning + Monthly Reporting"
-          }
-        ],
-        isPopular: false,
+        recommendedBudget: "$500-$2,000/month",
+        bestOutcome: "Find the right audience, offer, and campaign angle before scaling.",
       },
       {
         name: "Market Dominator",
-        price: "$4,550",
-        originalPrice: "$6,500",
-        discountPercentage: 30,
-        period: "/mo + 15% Ad Spend",
-        description: "Built for aggressive growth, B2B SaaS, and e-commerce scaling.",
+        description: "For brands ready to test, improve, and scale paid campaigns.",
+        oneMonth: "$1,299/mo",
+        fourMonth: "$999/mo",
+        bestFor:
+          "Businesses with a working offer that want better leads, lower waste, and stronger campaign structure.",
         features: [
-          "2-3 Platforms (Omnichannel)",
-          "8 Static + 4 Animated Banners/mo",
-          "Server-side Tagging (CAPI)",
-          "Daily Testing & CRO",
-          "Bi-Weekly Strategy Syncs"
+          "2 ad platforms - Google, Meta, or LinkedIn",
+          "Campaign setup and optimization",
+          "Conversion tracking setup",
+          "Pixel and CAPI guidance",
+          "8 static ad creatives/month",
+          "2 short motion or animated creatives/month",
+          "4 ad copy variations/month",
+          "Audience testing",
+          "Offer and landing page feedback",
+          "Weekly performance optimization",
+          "Bi-weekly strategy update",
+          "Monthly ROI report",
         ],
-        detailedDeliverables: [
-          {
-            title: "Omnichannel Funnel",
-            quantity: "2-3 Platforms Running Synchronously",
-            quality: "Cross-platform retargeting capturing leaky traffic",
-            time: "Always-on deployment"
-          },
-          {
-            title: "Scaled Creative Output",
-            quantity: "8 Static + 4 Animated Banners",
-            quality: "High-volume hook variations and strict A/B formats",
-            time: "Delivered consistently over exactly 30 days"
-          },
-          {
-            title: "Advanced Data Layer",
-            quantity: "Server-side Tagging (Meta CAPI)",
-            quality: "Bypassing iOS14 restrictions for precise event capturing",
-            time: "Maintained 24/7"
-          },
-          {
-            title: "Iterative Optimization",
-            quantity: "Daily Ad Tuning + CRO",
-            quality: "Granular pause/scale rules applied strictly to roas metrics",
-            time: "Daily checks + Bi-weekly Syncs"
-          }
-        ],
-        isPopular: true,
+        recommendedBudget: "$2,000-$8,000/month",
+        bestOutcome: "Improve cost per lead, conversion quality, and campaign consistency.",
+        badge: "Most Selected",
       },
       {
         name: "Enterprise Performance",
-        price: "$7,200+",
-        originalPrice: "$12,000+",
-        discountPercentage: 40,
-        period: "/mo + 20% Ad Spend",
-        description: "Total category leadership for massive ad budgets and intricate custom attribution models.",
+        description:
+          "For brands with larger ad budgets, multiple paid channels, and advanced tracking needs.",
+        oneMonth: "Starts at $2,499/mo",
+        fourMonth: "Starts at $1,999/mo",
+        bestFor:
+          "Established brands that need deeper campaign control, better attribution, and stronger scaling decisions.",
         features: [
-          "Unlimited Platforms + Native Ads",
-          "Unlimited Creative Testing",
-          "Full Data Attribution Modeling",
-          "24/7 Algorithmic Monitoring",
-          "Real-time Dashboard + Weekly Syncs"
+          "3+ ad platforms - Google, Meta, LinkedIn, TikTok, or Native Ads",
+          "Full campaign structure and optimization",
+          "Advanced conversion tracking review",
+          "Server-side tracking and CAPI guidance",
+          "Creative testing system",
+          "Landing page and funnel feedback",
+          "Custom performance dashboard",
+          "Weekly performance review",
+          "Monthly strategy call",
+          "Attribution and reporting improvement",
         ],
-        detailedDeliverables: [
-          {
-            title: "Total Market Coverage",
-            quantity: "Unlimited Platform Strategy",
-            quality: "Meta, Google, LinkedIn, TikTok, Native, DSPs",
-            time: "24/7 active management"
-          },
-          {
-            title: "Infinite Creative Engine",
-            quantity: "Unlimited Testing Limits",
-            quality: "Mass scale dynamic creative optimization (DCO)",
-            time: "Continuous iteration"
-          },
-          {
-            title: "Data Science & Attribution",
-            quantity: "Custom Attribution Modeling",
-            quality: "Multi-touch, fractional mapping—no more 'black box' data",
-            time: "Real-time dashboard updates"
-          },
-          {
-            title: "Algorithmic Precision",
-            quantity: "Dedicated Elite Team",
-            quality: "Machine learning augmented bidding strategies",
-            time: "24/7 Monitoring + Weekly Executive Syncs"
-          }
-        ],
-        isPopular: false,
-      }
-    ]
+        recommendedBudget: "$8,000+/month",
+        bestOutcome:
+          "Scale winning campaigns with clearer tracking, stronger creative testing, and less wasted ad spend.",
+      },
+    ],
   },
   "social-media": {
     label: "Social Media",
     packages: [
       {
         name: "Baseline Organic",
-        price: "$840",
-        originalPrice: "$1,200",
-        discountPercentage: 30,
-        period: "/mo",
-        description: "Consistent branding to ensure your digital footprint looks alive.",
+        description: "For brands that need a clean, active, and consistent social presence.",
+        oneMonth: "$399/mo",
+        fourMonth: "$299/mo",
+        bestFor:
+          "Businesses that want to stop looking inactive online and start posting with a clear content direction.",
         features: [
-          "2 Platforms Managed",
-          "12 Custom Posts per Month",
-          "Basic Community Management",
-          "Monthly Content Calendar",
-          "Analytics Overview"
+          "2 social platforms",
+          "8 custom posts/month",
+          "Monthly content calendar",
+          "Caption writing",
+          "Basic graphic design",
+          "Profile bio and CTA review",
+          "Basic community management",
+          "Monthly analytics overview",
         ],
-        detailedDeliverables: [
-          {
-            title: "2 Platforms Managed",
-            quantity: "Any 2 (e.g. IG + LinkedIn)",
-            quality: "Fully optimized bios and highlight covers",
-            time: "Daily monitoring"
-          },
-          {
-            title: "Custom Posts",
-            quantity: "12 High-Quality Graphics/Carousels",
-            quality: "Brand-aligned, no generic stock photos",
-            time: "3 Posts per week"
-          },
-          {
-            title: "Community Management",
-            quantity: "Basic Inbox & Comment Replies",
-            quality: "Professional tone, spam filtering",
-            time: "Handled within 24 hours"
-          }
-        ],
-        isPopular: false,
+        bestOutcome:
+          "Your brand looks active, clear, and trustworthy across key social channels.",
       },
       {
         name: "Aggressive Growth",
-        price: "$1,680",
-        originalPrice: "$2,800",
-        discountPercentage: 40,
-        period: "/mo",
-        description: "Our most chosen tier to rapidly expand and capture audience attention.",
+        description:
+          "For brands that want stronger content, better consistency, and more audience attention.",
+        oneMonth: "$799/mo",
+        fourMonth: "$599/mo",
+        bestFor:
+          "Businesses ready to build a stronger brand presence and publish content with strategy, not random posting.",
         features: [
-          "4 Platforms Managed",
-          "24 Custom Posts (Static + Motion Graphics)",
-          "Proactive Outbound Engagement",
-          "Graphic Design Support",
-          "Bi-Weekly Strategy Calls",
-          "Dedicated Account Manager"
+          "3 social platforms",
+          "16 custom posts/month",
+          "Static posts, carousels, and simple motion graphics",
+          "Monthly content strategy",
+          "Caption writing",
+          "Graphic design support",
+          "Content calendar",
+          "Proactive engagement support",
+          "Bi-weekly performance review",
+          "Monthly analytics report",
         ],
-        detailedDeliverables: [
-          {
-            title: "Full Coverage Content",
-            quantity: "24 Custom Posts",
-            quality: "Mix of high-end graphics and motion design",
-            time: "Every other day posting"
-          },
-          {
-            title: "Outbound Engagement",
-            quantity: "50+ Target Accounts Engaged",
-            quality: "Meaningful, non-bot authentic comments to pull traffic",
-            time: "Daily outbound ops"
-          },
-          {
-            title: "Strategy & Support",
-            quantity: "Bi-Weekly Calls",
-            quality: "Data-driven pivots on hooks and engagement rate",
-            time: "2 check-ins per month"
-          }
-        ],
-        isPopular: true,
+        bestOutcome:
+          "Your brand gets stronger visibility, better content quality, and more consistent audience touchpoints.",
+        badge: "Most Selected",
       },
       {
         name: "Viral Machinery",
-        price: "$2,000+",
-        originalPrice: "$5,000+",
-        discountPercentage: 60,
-        period: "/mo",
-        description: "A complete outsourced content team for high-volume brands.",
+        description:
+          "For brands that want high-volume content execution across multiple channels.",
+        oneMonth: "$1,499/mo",
+        fourMonth: "$1,099/mo",
+        bestFor:
+          "Brands that need an outsourced content team for social growth, campaign support, and regular publishing.",
         features: [
-          "Omnichannel Presence",
-          "Unlimited Daily Posts",
-          "Influencer Outreach Management",
-          "Dedicated UI/UX Designer",
-          "Priority 24/7 Community Handling",
-          "Custom Dashboard Analytics"
+          "4 social platforms",
+          "30 custom posts/month",
+          "Static posts, carousels, motion graphics, and short-form video scripts",
+          "Advanced content calendar",
+          "Creative direction",
+          "Community management support",
+          "Outbound engagement support",
+          "Influencer outreach research",
+          "Monthly campaign planning",
+          "Weekly performance update",
+          "Monthly analytics dashboard",
         ],
-        detailedDeliverables: [
-          {
-            title: "Mass Scale Posting",
-            quantity: "Unlimited Platform Management",
-            quality: "Volume-optimized tailored formats for every feed",
-            time: "Up to 2-3 times daily"
-          },
-          {
-            title: "Influencer Management",
-            quantity: "Up to 10 Micro-Influencer Campaigns/mo",
-            quality: "Vetting, negotiating, and shipping coordination",
-            time: "Ongoing dedicated outreach"
-          },
-          {
-            title: "Priority Community",
-            quantity: "24/7 Dedicated Brand Voice",
-            quality: "Converting DMs directly into sales pipeline",
-            time: "Responses under 1 hour"
-          }
-        ],
-        isPopular: false,
-      }
-    ]
+        bestOutcome:
+          "Your brand publishes at higher volume, tests more content angles, and builds stronger market presence.",
+      },
+    ],
   },
   "seo": {
     label: "Organic Marketing",
     packages: [
       {
         name: "Local Authority",
-        price: "$1,080",
-        originalPrice: "$1,800",
-        discountPercentage: 40,
-        period: "/mo",
-        description: "Dominate local search results and capture high-intent geographic traffic.",
+        description:
+          "For businesses that want better visibility in local search, maps, and nearby buyer searches.",
+        oneMonth: "$599/mo",
+        fourMonth: "$449/mo",
+        bestFor:
+          "Local service businesses, clinics, agencies, consultants, and location-based brands.",
         features: [
-          "Google Business Profile Optimization",
-          "Local Citation Building",
-          "Organic Visibility Setup",
-          "Basic Technical SEO Audit",
-          "Keyword Tracking (Up to 50)"
+          "Google Business Profile optimization",
+          "Local keyword research",
+          "Local service page recommendations",
+          "Basic technical SEO audit",
+          "On-page SEO for 2 pages",
+          "Local schema setup guidance",
+          "10 local citations/month",
+          "Review strategy guidance",
+          "Keyword tracking up to 20 keywords",
+          "Monthly visibility report",
         ],
-        detailedDeliverables: [
-          {
-            title: "Local SEO Setup",
-            quantity: "1 Location + 50 Citations",
-            quality: "Fully filled maps, 100% NAP consistency",
-            time: "Spread out over first 3 months"
-          },
-          {
-            title: "Organic Search Setup",
-            quantity: "Local service page optimization",
-            quality: "High-intent local keyword targeting and page clarity",
-            time: "Weekly monitoring"
-          },
-          {
-            title: "Content Optimization",
-            quantity: "2 Target SEO Blogs/mo",
-            quality: "SurferSEO optimized (Score 80+), human written",
-            time: "Bi-weekly publishing"
-          }
-        ],
-        isPopular: false,
+        bestOutcome:
+          "Your business becomes easier to find when local buyers search for your service.",
       },
       {
         name: "National Ascend",
-        price: "$2,100",
-        originalPrice: "$3,500",
-        discountPercentage: 40,
-        period: "/mo",
-        description: "Aggressive organic growth targeting highly competitive national keywords.",
+        description: "For brands that want organic growth beyond one city or location.",
+        oneMonth: "$999/mo",
+        fourMonth: "$749/mo",
+        bestFor:
+          "Businesses targeting competitive keywords, service pages, blogs, and national search visibility.",
         features: [
-          "Comprehensive Technical SEO",
-          "Advanced Content Optimization",
-          "High-Quality Backlink Building",
-          "Search Intent Mapping",
-          "Advanced Schema Markup",
-          "Monthly Strategy Deep-Dive"
+          "Technical SEO audit and fixes",
+          "Search intent mapping",
+          "SEO content strategy",
+          "2 SEO blogs/month",
+          "1 topic cluster/month",
+          "On-page SEO for 4 pages",
+          "Internal linking improvement",
+          "Advanced schema recommendations",
+          "Link opportunity research",
+          "Keyword tracking up to 50 keywords",
+          "Monthly strategy call",
+          "Monthly organic performance report",
         ],
-        detailedDeliverables: [
-          {
-            title: "Organic Growth Engine",
-            quantity: "Content + search intent system",
-            quality: "Topic mapping, page improvements, and internal linking",
-            time: "Weekly optimization"
-          },
-          {
-            title: "Technical Foundation",
-            quantity: "Full Site Architecture Fix",
-            quality: "Zero broken links, lightning fast load, canonicals fixed",
-            time: "First 45 Days"
-          },
-          {
-            title: "Pillar Content & Backlinks",
-            quantity: "4 Indepth Articles + 3-5 DR 40+ Links",
-            quality: "Industry-expert level research, genuine outreach",
-            time: "Weekly alignment"
-          }
-        ],
-        isPopular: true,
+        bestOutcome:
+          "Your website builds stronger topical authority, better rankings, and more qualified organic traffic.",
+        badge: "Most Selected",
       },
       {
         name: "Enterprise Dominance",
-        price: "$2,800+",
-        originalPrice: "$7,000+",
-        discountPercentage: 60,
-        period: "/mo",
-        description: "Massive scale organic visibility planning for large websites.",
+        description:
+          "For larger websites that need deeper SEO, content architecture, and AI visibility planning.",
+        oneMonth: "Starts at $1,999/mo",
+        fourMonth: "Starts at $1,499/mo",
+        bestFor:
+          "SaaS brands, large service websites, marketplaces, directories, and content-heavy businesses.",
         features: [
-          "Programmatic SEO Strategy",
-          "Enterprise Content Architecture",
-          "AEO & GEO Content Planning",
-          "Digital PR & Link Acquisition",
-          "Log File & Crawl Analysis",
-          "Custom ROI Reporting"
+          "Full technical SEO audit",
+          "Site architecture review",
+          "Programmatic SEO planning",
+          "AEO and GEO content planning",
+          "Enterprise content roadmap",
+          "Search intent and topic gap analysis",
+          "Advanced schema planning",
+          "Crawl analysis",
+          "Log file review if access is available",
+          "Digital PR and link acquisition strategy",
+          "Custom organic growth dashboard",
+          "Monthly strategy deep-dive",
         ],
-        detailedDeliverables: [
-          {
-            title: "Mass Organic Scale",
-            quantity: "Large content and page system planning",
-            quality: "Structured topic clusters and answer-ready content",
-            time: "Always-on visibility monitoring"
-          },
-          {
-            title: "Programmatic Scale",
-            quantity: "Thousands of Generated Pages",
-            quality: "High-quality dynamic data combining without cannibalization",
-            time: "3-6 Month deployment cycle"
-          },
-          {
-            title: "Competitor Interception",
-            quantity: "Deep Gap Analysis & Ad Bidding",
-            quality: "Stealing traffic directly from competitor branded terms",
-            time: "Monthly sprint planning"
-          }
-        ],
-        isPopular: false,
-      }
-    ]
-  }
+        bestOutcome:
+          "Your website gets a cleaner SEO structure, stronger content direction, and better visibility across search and AI answer engines.",
+      },
+    ],
+  },
 };
 
 export type PricingTableProps = {
   id?: string;
-  customPackages?: PricingPackage[];
+  defaultCategory?: PricingCategoryKey;
 };
 
-export default function PricingTable({ id, customPackages }: PricingTableProps = {}) {
-  const [activeTab, setActiveTab] = useState<keyof typeof pricingData>("growth-marketing");
-  const [selectedPackage, setSelectedPackage] = useState<PricingPackage | null>(null);
-  const [packageTerms, setPackageTerms] = useState<Record<string, boolean>>({});
-  
-  const isFourMonthForPkg = (name: string) => packageTerms[name] !== false;
-  
-  const displayPackages = customPackages || pricingData[activeTab].packages;
+export default function PricingTable({
+  id,
+  defaultCategory = "growth-marketing",
+}: PricingTableProps = {}) {
+  const [activeTab, setActiveTab] = useState<PricingCategoryKey>(defaultCategory);
+  const [packageTerms, setPackageTerms] = useState<Record<string, BillingTerm>>({});
+
+  const activeCategory = pricingData[activeTab];
+  const selectedTerm = (pkg: PricingPackage) => packageTerms[pkg.name] ?? "fourMonth";
+  const getPrice = (pkg: PricingPackage) =>
+    selectedTerm(pkg) === "oneMonth" ? pkg.oneMonth : pkg.fourMonth;
+  const getNote = (pkg: PricingPackage) =>
+    selectedTerm(pkg) === "oneMonth" ? pkg.oneMonthNote : pkg.fourMonthNote;
 
   return (
     <div id={id || "pricing-table"} className="w-full relative flex flex-col items-center justify-center z-20 overflow-visible mb-24">
-      
-      {/* Background glow behind pricing */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-[var(--accent)] opacity-[0.04] blur-[150px] rounded-full pointer-events-none"></div>
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-[var(--accent)] opacity-[0.04] blur-[150px] rounded-full pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-6 relative w-full">
-        
-        {/* Header */}
-        <div className="flex justify-center mb-4">
-          <div className="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/30 text-red-400 font-black text-sm uppercase tracking-widest px-5 py-2 rounded-full">
-            <span className="inline-block w-2 h-2 bg-red-400 rounded-full animate-pulse"></span>
-            Limited-Time: Up to 60% OFF All Packages
-            <span className="inline-block w-2 h-2 bg-red-400 rounded-full animate-pulse"></span>
-          </div>
-        </div>
         <SectionHeader
-          badge="ROI-Focused Capital Allocation"
-          titleBase="Strategic Growth"
-          titleHighlight="Investments"
-          subtitle="Stop buying isolated services. Start deploying capital into high-yield growth engines. No bloated retainers—just completely quantified packages designed to compound your revenue."
+          badge="Pricing"
+          titleBase={activeCategory.heading || "Strategic Growth"}
+          titleHighlight={activeCategory.subheading ?? "Investments"}
+          subtitle={
+            activeCategory.supportingDescription ? (
+              <>
+                <span className="font-semibold text-gray-300">{activeCategory.description}</span>
+                <br />
+                {activeCategory.supportingDescription}
+              </>
+            ) : (
+              activeCategory.description || "Select the package that matches your current growth stage and channel focus."
+            )
+          }
           alignment="center"
         />
 
-        {/* Custom Tabs (hidden if custom packages provided) */}
-        {!customPackages && (
-          <div className="flex flex-wrap justify-center gap-2 mb-16 p-1.5 bg-white/5 border border-white/10 rounded-2xl md:rounded-full mx-auto max-w-fit shadow-xl backdrop-blur-md">
-            {(Object.keys(pricingData) as Array<keyof typeof pricingData>).map((key) => {
-              const isActive = activeTab === key;
-              return (
-                <button
-                  key={key}
-                  onClick={() => setActiveTab(key)}
-                  className={`relative px-6 py-3 rounded-xl md:rounded-full text-sm font-bold transition-all duration-300 ${
-                    isActive ? "text-black" : "text-gray-400"
-                  }`}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="active-pill"
-                      className="absolute inset-0 bg-[var(--accent)] rounded-xl md:rounded-full z-0"
-                      transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                    />
-                  )}
-                  <span className="relative z-10">{pricingData[key].label}</span>
-                </button>
-              );
-            })}
+        {activeCategory.note && (
+          <div className="max-w-3xl mx-auto -mt-8 mb-12 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 text-center text-sm font-semibold leading-relaxed text-[rgba(240,240,248,0.68)]">
+            {activeCategory.note}
           </div>
         )}
 
-        {/* Pricing Cards */}
+        <div className="flex flex-wrap justify-center gap-2 mb-16 p-1.5 bg-white/5 border border-white/10 rounded-2xl md:rounded-full mx-auto max-w-fit shadow-xl backdrop-blur-md">
+          {(Object.keys(pricingData) as PricingCategoryKey[]).map((key) => {
+            const isActive = activeTab === key;
+            return (
+              <button
+                key={key}
+                onClick={() => setActiveTab(key)}
+                className={`relative px-6 py-3 rounded-xl md:rounded-full text-sm font-bold transition-all duration-300 ${
+                  isActive ? "text-black" : "text-gray-400"
+                }`}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="active-pill"
+                    className="absolute inset-0 bg-[var(--accent)] rounded-xl md:rounded-full z-0"
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  />
+                )}
+                <span className="relative z-10">{pricingData[key].label}</span>
+              </button>
+            );
+          })}
+        </div>
+
         <div className="min-h-[600px]">
           <AnimatePresence mode="wait">
             <motion.div
-              key={customPackages ? "custom" : activeTab}
+              key={activeTab}
               initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               exit={{ opacity: 0, y: -20, filter: "blur(4px)" }}
               transition={{ duration: 0.4 }}
-              className={`grid grid-cols-1 md:grid-cols-${Math.min(displayPackages.length, 3)} gap-8 items-stretch justify-center`}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch justify-center"
             >
-              {displayPackages.map((pkg) => (
-                <div
-                  key={pkg.name}
-                  className={`relative flex flex-col bg-[#0b0b0e] p-8 rounded-3xl border transition-all duration-300 ${
-                    pkg.isPopular 
-                      ? "border-[var(--accent)] shadow-[0_0_40px_rgba(155,255,110,0.1)] md:-translate-y-4" 
-                      : "border-white/10"
-                  }`}
-                >
-                  {pkg.isPopular && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[var(--accent)] text-black font-bold text-xs uppercase tracking-wider py-1.5 px-4 rounded-full shadow-lg">
-                      Most Selected
-                    </div>
-                  )}
-                  {!pkg.isPopular && pkg.discountPercentage && pkg.discountPercentage > 0 && (
-                    <div className="absolute -top-3.5 right-4 bg-red-500 text-white font-black text-[10px] uppercase tracking-wider py-1 px-3 rounded-full shadow-lg">
-                      {pkg.discountPercentage}% OFF
-                    </div>
-                  )}
-                  {pkg.isPopular && pkg.discountPercentage && pkg.discountPercentage > 0 && (
-                    <div className="absolute -top-3.5 right-4 bg-red-500 text-white font-black text-[10px] uppercase tracking-wider py-1 px-3 rounded-full shadow-lg">
-                      {pkg.discountPercentage}% OFF
-                    </div>
-                  )}
+              {activeCategory.packages.map((pkg) => {
+                const term = selectedTerm(pkg);
+                const note = getNote(pkg);
 
-                  <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                    <h3 className="text-xl font-bold text-[#f0f0f8]">{pkg.name}</h3>
-                    {typeof pkg.price === 'number' && (
-                      <div className="flex items-center bg-[#111115] p-0.5 rounded-full border border-white/5 shrink-0">
-                        <button 
-                          onClick={() => setPackageTerms(p => ({...p, [pkg.name]: false}))}
-                          className={`text-[9px] font-bold px-2 py-1 flex items-center rounded-full transition-all duration-300 ${!isFourMonthForPkg(pkg.name) ? 'bg-white/10 text-white shadow-sm' : 'text-gray-500'}`}
-                        >
-                          1-Mo
-                        </button>
-                        <button 
-                          onClick={() => setPackageTerms(p => ({...p, [pkg.name]: true}))}
-                          className={`text-[9px] font-bold px-2 py-1 flex items-center rounded-full transition-all duration-300 ${isFourMonthForPkg(pkg.name) ? 'bg-[var(--accent)] text-black shadow-[0_0_10px_rgba(155,255,110,0.2)]' : 'text-gray-500'}`}
-                        >
-                          4-Mo
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  <p className="text-gray-400 text-sm mb-6 min-h-[40px] leading-relaxed">
-                    {pkg.description}
-                  </p>
-
-                  <div className="mb-4 border-b border-white/10 pb-8 flex flex-col gap-1">
-
-                    <div className="flex items-baseline gap-2">
-                    {typeof pkg.price === 'number' ? (
-                      (() => {
-                        const discount = isFourMonthForPkg(pkg.name) ? (pkg.discountPercentage||0) : (pkg.monthlyDiscountPercentage||0);
-                        return discount > 0 ? (
-                          <>
-                            <span className="text-xl font-medium text-gray-500/70 line-through">${pkg.price.toLocaleString()}</span>
-                            <span className="text-4xl font-black text-white">${(pkg.price * (1 - discount / 100)).toLocaleString()}</span>
-                          </>
-                        ) : (
-                           <span className="text-4xl font-black text-white">${pkg.price.toLocaleString()}</span>
-                        );
-                      })()
-                    ) : (
-                      <>
-                        {pkg.originalPrice && <span className="text-xl font-medium text-gray-500/70 line-through">{pkg.originalPrice}</span>}
-                        <span className="text-4xl font-black text-white">{pkg.price}</span>
-                      </>
-                    )}
-                    <span className="text-gray-500 font-medium">{pkg.period}</span>
-                    </div>
-                    {typeof pkg.price === 'number' && (
-                      <span className={`text-xs font-medium tracking-wide transition-colors ${isFourMonthForPkg(pkg.name) ? 'text-[var(--accent)]/90' : 'text-red-500'}`}>Requires 4-month commitment for max results</span>
-                    )}
-                  </div>
-
-                  <ul className="flex flex-col gap-4 mb-10 flex-1">
-                    {pkg.features.map((feature, fIdx) => {
-                      const { isIncluded, content } = getFeatureDisplay(feature);
-
-                      return (
-                        <li key={fIdx} className={`flex items-start gap-3 ${!isIncluded ? 'opacity-50' : ''}`}>
-                          <svg className={`w-5 h-5 shrink-0 mt-0.5 ${isIncluded ? 'text-[var(--accent)]' : 'text-gray-600'}`} fill="none" viewBox="0 0 24 24">
-                            {isIncluded ? (
-                              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                            ) : (
-                              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                            )}
-                          </svg>
-                          <span className={`text-[0.95rem] ${isIncluded ? 'text-gray-300' : 'text-gray-500 line-through'}`}>{content}</span>
-                        </li>
-                      );
-                    })}
-                  </ul>
-
-                  <button
-                    onClick={() => setSelectedPackage(pkg)}
-                    className={`mt-auto text-center font-bold py-4 px-6 rounded-xl transition-all duration-300 w-full ${
-                      pkg.isPopular 
-                        ? "bg-[var(--accent)] text-black hover:bg-[#86ea5c] shadow-[0_0_20px_rgba(155,255,110,0.3)]" 
-                        : "bg-white/5 text-white hover:bg-white/10"
+                return (
+                  <div
+                    key={pkg.name}
+                    className={`relative flex min-w-0 flex-col bg-[#0b0b0e] p-8 rounded-3xl border transition-all duration-300 ${
+                      pkg.badge
+                        ? "border-[var(--accent)] shadow-[0_0_40px_rgba(155,255,110,0.1)] lg:-translate-y-4"
+                        : "border-white/10"
                     }`}
                   >
-                    View Package Details
-                  </button>
-                </div>
-              ))}
+                    {pkg.badge && (
+                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[var(--accent)] text-black font-bold text-xs uppercase tracking-wider py-1.5 px-4 rounded-full shadow-lg whitespace-nowrap">
+                        {pkg.badge}
+                      </div>
+                    )}
+
+                    <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+                      <h3 className="text-xl font-bold text-[#f0f0f8]">{pkg.name}</h3>
+                      <div className="flex items-center bg-[#111115] p-0.5 rounded-full border border-white/5 shrink-0">
+                        <button
+                          onClick={() => setPackageTerms((p) => ({ ...p, [pkg.name]: "oneMonth" }))}
+                          className={`text-[9px] font-bold px-2 py-1 flex items-center rounded-full transition-all duration-300 ${
+                            term === "oneMonth" ? "bg-white/10 text-white shadow-sm" : "text-gray-500"
+                          }`}
+                        >
+                          1-Month
+                        </button>
+                        <button
+                          onClick={() => setPackageTerms((p) => ({ ...p, [pkg.name]: "fourMonth" }))}
+                          className={`text-[9px] font-bold px-2 py-1 flex items-center rounded-full transition-all duration-300 ${
+                            term === "fourMonth"
+                              ? "bg-[var(--accent)] text-black shadow-[0_0_10px_rgba(155,255,110,0.2)]"
+                              : "text-gray-500"
+                          }`}
+                        >
+                          4-Month
+                        </button>
+                      </div>
+                    </div>
+
+                    <p className="text-gray-400 text-sm mb-6 min-h-[40px] leading-relaxed">
+                      {pkg.description}
+                    </p>
+
+                    <div className="mb-5 border-b border-white/10 pb-7 flex flex-col gap-2">
+                      <div className="flex flex-wrap items-baseline gap-2">
+                        <span className="text-3xl md:text-4xl font-black text-white break-words">
+                          {getPrice(pkg)}
+                        </span>
+                        <span className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--accent)]">
+                          {term === "oneMonth" ? "1-Month" : "4-Month"}
+                        </span>
+                        {term === "fourMonth" && (
+                          <span className="rounded-full border border-[var(--accent)]/20 bg-[var(--accent)]/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--accent)]">
+                            Best Value
+                          </span>
+                        )}
+                      </div>
+                      {note && (
+                        <span className="text-xs font-medium leading-relaxed text-[var(--accent)]/90">
+                          {note}
+                        </span>
+                      )}
+                      {term === "fourMonth" && (
+                        <span className="text-xs font-medium leading-relaxed text-gray-500">
+                          Recommended for 4 months to build, test, and improve the growth system.
+                        </span>
+                      )}
+                    </div>
+
+                    {pkg.bestFor && (
+                      <p className="mb-5 rounded-2xl border border-white/5 bg-white/[0.025] p-4 text-xs leading-relaxed text-gray-400">
+                        <span className="font-bold text-gray-300">Best for: </span>
+                        {pkg.bestFor}
+                      </p>
+                    )}
+
+                    <ul className="flex flex-col gap-3.5 mb-7 flex-1">
+                      {pkg.features.map((feature) => (
+                        <li key={feature} className="flex min-w-0 items-start gap-3">
+                          <svg className="w-5 h-5 shrink-0 mt-0.5 text-[var(--accent)]" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span className="min-w-0 break-words text-[0.95rem] leading-relaxed text-gray-300">
+                            {feature}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {pkg.recommendedBudget && (
+                      <p className="mb-3 text-xs leading-relaxed text-gray-500">
+                        <span className="font-bold text-gray-400">Recommended ad budget: </span>
+                        {pkg.recommendedBudget}
+                      </p>
+                    )}
+
+                    {pkg.bestOutcome && (
+                      <p className="mb-7 text-xs leading-relaxed text-gray-500">
+                        <span className="font-bold text-gray-400">Best outcome: </span>
+                        {pkg.bestOutcome}
+                      </p>
+                    )}
+
+                    <a
+                      href={OFFICIAL_LINKS.calendly}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`mt-auto text-center font-bold py-4 px-6 rounded-xl transition-all duration-300 w-full ${
+                        pkg.badge
+                          ? "bg-[var(--accent)] text-black hover:bg-[#86ea5c] shadow-[0_0_20px_rgba(155,255,110,0.3)]"
+                          : "bg-white/5 text-white hover:bg-white/10"
+                      }`}
+                    >
+                      Book a Discovery Call
+                    </a>
+                  </div>
+                );
+              })}
             </motion.div>
           </AnimatePresence>
         </div>
 
-        {/* Bottom text */}
         <div className="mt-16 text-center text-gray-500 text-sm">
-          Want a custom hybrid plan combining multiple services? <a href={OFFICIAL_LINKS.calendly} target="_blank" rel="noopener noreferrer" className="text-[var(--accent)] underline underline-offset-4 hover:text-[#86ea5c]">Let&apos;s talk.</a>
+          Want a custom hybrid plan combining multiple services?{" "}
+          <a
+            href={OFFICIAL_LINKS.calendly}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[var(--accent)] underline underline-offset-4 hover:text-[#86ea5c]"
+          >
+            Let&apos;s talk.
+          </a>
         </div>
-
       </div>
-
-      {/* Modal Overlay */}
-      <AnimatePresence>
-        {selectedPackage && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-6" style={{ pointerEvents: 'auto' }}>
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-[#060608]/90 backdrop-blur-md"
-              onClick={() => setSelectedPackage(null)}
-            />
-            
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-4xl bg-[#0b0b0e] border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10"
-              style={{ maxHeight: '85vh', margin: '2rem 0' }}
-            >
-              {/* Header */}
-              <div className="p-6 md:p-8 border-b border-white/5 flex justify-between items-start bg-white/[0.02]">
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-2xl font-bold text-[#f0f0f8]">{selectedPackage.name}</h3>
-                    {selectedPackage.isPopular && (
-                      <span className="bg-[var(--accent)] text-black font-bold text-[10px] uppercase tracking-wider py-1 px-3 rounded-full">
-                        Most Selected
-                      </span>
-                    )}
-                    {typeof selectedPackage.price === 'number' && (
-                      <div className="flex items-center bg-[#111115] p-0.5 rounded-full border border-white/5 ml-auto">
-                        <button 
-                          onClick={() => setPackageTerms(p => ({...p, [selectedPackage.name]: false}))}
-                          className={`text-[10px] font-bold px-3 py-1 rounded-full transition-all duration-300 ${!isFourMonthForPkg(selectedPackage.name) ? 'bg-white/10 text-white shadow-sm' : 'text-gray-500'}`}
-                        >
-                          1-Mo
-                        </button>
-                        <button 
-                          onClick={() => setPackageTerms(p => ({...p, [selectedPackage.name]: true}))}
-                          className={`text-[10px] font-bold px-3 py-1 rounded-full transition-all duration-300 ${isFourMonthForPkg(selectedPackage.name) ? 'bg-[var(--accent)] text-black shadow-[0_0_10px_rgba(155,255,110,0.2)]' : 'text-gray-500'}`}
-                        >
-                          4-Mo
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-baseline gap-2 mt-1">
-                    {typeof selectedPackage.price === 'number' ? (
-                      (() => {
-                        const discount = isFourMonthForPkg(selectedPackage.name) ? (selectedPackage.discountPercentage||0) : (selectedPackage.monthlyDiscountPercentage||0);
-                        return discount > 0 ? (
-                          <>
-                            <span className="text-xl font-medium text-gray-500/70 line-through">${selectedPackage.price.toLocaleString()}</span>
-                            <span className="text-3xl font-black text-white">${(selectedPackage.price * (1 - discount / 100)).toLocaleString()}</span>
-                          </>
-                        ) : (
-                           <span className="text-3xl font-black text-white">${selectedPackage.price.toLocaleString()}</span>
-                        );
-                      })()
-                    ) : (
-                      <>
-                        {selectedPackage.originalPrice && <span className="text-xl font-medium text-gray-500/70 line-through">{selectedPackage.originalPrice}</span>}
-                        <span className="text-3xl font-black text-white">{selectedPackage.price}</span>
-                      </>
-                    )}
-                    <span className="text-gray-500 font-medium">{selectedPackage.period}</span>
-                    </div>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => setSelectedPackage(null)}
-                  className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-              </div>
-
-              {/* Body */}
-              <div className="p-6 md:p-8 overflow-y-auto flex-1 custom-scrollbar">
-                <p className="text-gray-300 mb-8 text-lg">{selectedPackage.description}</p>
-                
-                <h4 className="text-[var(--accent)] font-bold text-sm tracking-widest uppercase mb-6 flex items-center gap-3">
-                  <span className="w-8 h-px bg-[var(--accent)]/50"></span>
-                  Clarified Deliverables
-                  <span className="flex-1 h-px bg-[var(--accent)]/10"></span>
-                </h4>
-                
-                <div className="flex flex-col gap-4">
-                  {selectedPackage.detailedDeliverables && selectedPackage.detailedDeliverables.length > 0 ? (
-                    selectedPackage.detailedDeliverables.map((item, idx) => (
-                      <div key={idx} className="bg-white/5 border border-white/5 rounded-2xl p-5 hover:border-[var(--accent)]/30 transition-colors">
-                        <h5 className="font-bold text-lg text-white mb-4">{item.title}</h5>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div className="flex flex-col gap-1">
-                            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Quantity</span>
-                            <span className="text-sm text-gray-300">{item.quantity}</span>
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Quality Expectation</span>
-                            <span className="text-sm text-gray-300">{item.quality}</span>
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Time / Frequency</span>
-                            <span className="text-sm text-gray-300">{item.time}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="bg-white/5 border border-white/5 rounded-2xl p-6 text-center text-gray-400">
-                      Standard deliverables apply. Please contact us for a detailed breakdown or view the basic features below.
-                      <ul className="mt-4 text-left flex flex-col gap-2 max-w-md mx-auto">
-                        {selectedPackage.features.map((feat, i) => {
-                          const { isIncluded, content } = getFeatureDisplay(feat);
-                          return (
-                            <li key={i} className={`flex gap-2 text-sm items-start ${!isIncluded ? 'opacity-50 text-gray-500 line-through' : 'text-gray-300'}`}>
-                              <span className={isIncluded ? 'text-[var(--accent)]' : 'text-gray-600'}>
-                                {isIncluded ? '✦' : '✕'}
-                              </span> 
-                              <span>{content}</span>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div className="p-6 md:p-8 border-t border-white/5 bg-black/20 flex flex-col md:flex-row justify-between items-center gap-4">
-                <p className="text-xs text-gray-500 flex-1">
-                  100% transparency. By proceeding, you will be connected with our directors to instantly begin onboarding for these exact deliverables.
-                </p>
-                <a
-                  href="/contact"
-                  className="bg-[var(--accent)] text-black font-bold py-4 px-8 rounded-xl hover:bg-[#86ea5c] shadow-[0_0_20px_rgba(155,255,110,0.2)] transition-all whitespace-nowrap"
-                >
-                  Confirm & Start Onboarding
-                </a>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      <style dangerouslySetInnerHTML={{__html: `
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: rgba(255,255,255,0.02);
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(255,255,255,0.1);
-          border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(255,255,255,0.2);
-        }
-      `}} />
     </div>
   );
 }

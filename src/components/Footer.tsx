@@ -133,13 +133,26 @@ export default function Footer() {
               <h3 className="text-white font-extrabold mb-1 tracking-tight text-lg relative z-10">Weekly Growth Insights</h3>
               <p className="text-[0.95rem] text-gray-400 mb-6 font-medium relative z-10">No fluff. Just proven scaling tactics delivered straight to your inbox.</p>
               
-              <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-3 relative z-10">
+              <form
+                onSubmit={handleNewsletterSubmit}
+                className="flex flex-col sm:flex-row gap-3 relative z-10"
+                autoComplete="off"
+                data-lpignore="true"
+                data-1p-ignore="true"
+                data-bwignore="true"
+                data-form-type="other"
+              >
                 <input 
                   type="email" 
                   required
                   value={newsletterEmail}
                   onChange={(event) => setNewsletterEmail(event.target.value)}
                   placeholder="name@company.com" 
+                  autoComplete="email"
+                  data-lpignore="true"
+                  data-1p-ignore="true"
+                  data-bwignore="true"
+                  data-form-type="other"
                   className="w-full bg-[#060608]/80 border border-white/10 rounded-xl px-4 py-4 text-[0.95rem] outline-none focus:border-[var(--accent)] transition-colors font-semibold text-white placeholder:text-gray-600 shadow-inner"
                 />
                 <button type="submit" disabled={newsletterStatus === "loading"} className="bg-white hover:bg-[var(--accent)] text-black px-8 py-4 rounded-xl text-[0.95rem] font-bold shadow-lg transition-all whitespace-nowrap hover:scale-[1.02] flex items-center justify-center gap-2 disabled:opacity-50">

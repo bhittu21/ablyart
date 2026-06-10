@@ -235,34 +235,19 @@ export default function HeroSection({ id = "hero" }: { id?: string }) {
         {/* Headline */}
         <h1
           style={{
-            fontSize: "clamp(3rem, 8vw, 6rem)",
+            fontSize: "clamp(2.15rem, 6.4vw, 4.75rem)",
             fontWeight: 900,
-            lineHeight: 1.05,
+            lineHeight: 1.08,
             letterSpacing: "-0.04em",
             marginBottom: "24px",
             color: "#f0f0f8",
+            overflowWrap: "normal",
           }}
         >
-          <div style={{ marginBottom: "16px", display: "flex", justifyContent: "center" }}>
-            <span style={{
-              fontSize: "clamp(1.2rem, 2.5vw, 1.6rem)",
-              fontStyle: "italic",
-              fontFamily: "Georgia, 'Times New Roman', serif",
-              fontWeight: 400,
-              color: "var(--accent)",
-              border: "1px solid rgba(155,255,110,0.25)",
-              padding: "6px 24px",
-              borderRadius: "50px",
-              background: "rgba(155,255,110,0.05)",
-              letterSpacing: "0.02em",
-              transform: "rotate(-2deg)",
-              boxShadow: "0 10px 20px rgba(155,255,110,0.05)"
-            }}>
-              Predictable
-            </span>
-          </div>
-          n<sup>x</sup> Growth{" "}
-          <span className="gradient-text break-words">for Scalable Startups</span>
+          <span style={{ display: "block" }}>We do Growth Marketing for</span>
+          <span className="gradient-text" style={{ display: "block", textWrap: "balance" }}>
+            More Visibility, Leads, and Sales
+          </span>
         </h1>
 
         {/* Subheadline */}

@@ -38,7 +38,10 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} h-full antialiased`}
     >
-      <body className={`${inter.className} min-h-full flex flex-col bg-[#060608] antialiased overflow-x-clip w-full`}>
+      <body
+        suppressHydrationWarning
+        className={`${inter.className} min-h-full flex flex-col bg-[#060608] antialiased overflow-x-clip w-full`}
+      >
         <div className="relative w-full overflow-x-clip flex flex-col min-h-screen">
           <CustomCursor />
           <Navbar/>

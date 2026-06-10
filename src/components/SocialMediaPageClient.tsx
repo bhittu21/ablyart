@@ -26,53 +26,6 @@ const deliverables = [
   }
 ];
 
-const socialPackages = [
-  {
-    name: "Baseline Organic",
-    price: "$1,200",
-    period: "/mo",
-    description: "Consistent branding to ensure your digital footprint looks alive.",
-    features: [
-      "2 Platforms Managed",
-      "12 Custom Posts per Month",
-      "Basic Community Management",
-      "Monthly Content Calendar",
-      "Analytics Overview"
-    ],
-    isPopular: false,
-  },
-  {
-    name: "Aggressive Growth",
-    price: "$2,800",
-    period: "/mo",
-    description: "Our most chosen tier to rapidly expand and capture audience attention.",
-    features: [
-      "4 Platforms Managed",
-      "24 Custom Posts (Static + Motion Graphics)",
-      "Proactive Outbound Engagement",
-      "Graphic Design Support",
-      "Bi-Weekly Strategy Calls",
-      "Dedicated Account Manager"
-    ],
-    isPopular: true,
-  },
-  {
-    name: "Viral Machinery",
-    price: "$5,000+",
-    period: "/mo",
-    description: "A complete outsourced content team for high-volume brands.",
-    features: [
-      "Omnichannel Presence",
-      "Unlimited Daily Posts",
-      "Influencer Outreach Management",
-      "Dedicated UI/UX Designer",
-      "Priority 24/7 Community Handling",
-      "Custom Dashboard Analytics"
-    ],
-    isPopular: false,
-  }
-];
-
 const socialArticles = [
   {
     category: "Organic Social",
@@ -325,7 +278,7 @@ export default function SocialMediaPageClient() {
           }
         ]}
       />
-      <PricingSection customPackages={socialPackages} />
+      <PricingSection defaultCategory="social-media" />
       <BlogSection 
         badge="Proof of Concept"
         titleBase="See The Strategy"

@@ -31,51 +31,6 @@ const deliverables = [
   }
 ];
 
-const leadGenPackages = [
-  {
-    name: "Pipeline Starter",
-    price: "$3,000",
-    period: "/mo",
-    description: "Launch your first robust inbound funnel and basic outbound outreach.",
-    features: [
-      "1 Active Sales Funnel",
-      "Up to 1k Outbound Emails / mo",
-      "Basic CRM Integration",
-      "1 Custom Landing Page",
-      "Monthly SLA Reviews"
-    ],
-    isPopular: false,
-  },
-  {
-    name: "Growth Engine",
-    price: "$5,500",
-    period: "/mo",
-    description: "Multi-funnel scaling with aggressive outbound volume for B2B ops.",
-    features: [
-      "2 Active Sales Funnels",
-      "Up to 10k Outbound Emails / mo",
-      "Advanced Email Nurture Sequences",
-      "A/B Landing Page Testing",
-      "Bi-Weekly Strategy Calls"
-    ],
-    isPopular: true,
-  },
-  {
-    name: "Enterprise Domination",
-    price: "$10,000+",
-    period: "/mo",
-    description: "For established teams needing massive appointment volume.",
-    features: [
-      "Unlimited Funnels Managed",
-      "50k+ Outbound Volume / mo",
-      "AI Appointment Setter Integration",
-      "Dedicated Full-Time Inbox Manager",
-      "Weekly SLA & Pipeline Huddles"
-    ],
-    isPopular: false,
-  }
-];
-
 const leadGenArticles = [
   {
     category: "Case Study",
@@ -331,7 +286,7 @@ export default function LeadGenPageClient() {
           }
         ]}
       />
-      <PricingSection customPackages={leadGenPackages} />
+      <PricingSection defaultCategory="growth-marketing" />
       <BlogSection 
         badge="Proof of Concept"
         titleBase="See The Strategy"
